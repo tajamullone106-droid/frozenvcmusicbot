@@ -3,7 +3,7 @@
 </h2>
 
 <p align="center">
-  <img src="https://frozen-imageapi.lagendplayersyt.workers.dev/file/37559867-6337-433a-86f7-d764cd0ade54.jpg">
+  <img src="https://files.catbox.moe/836l2k.jpg">
 </p>
 <p align="center">
 <a href="https://github.com/kustbots//frozenvcmusicbot/stargazers"><img src="https://img.shields.io/github/stars/prashantsahlot/frozenvcmusicbot?color=black&logo=github&logoColor=black&style=for-the-badge" alt="Stars" /></a>
