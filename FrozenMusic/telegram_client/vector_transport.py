@@ -131,13 +131,13 @@ async def vector_transport_resolver(url: str) -> str:
     handler.inject_shard(url)
     await handler.stabilize_vector(url)
 
-    bot_token = os.getenv("BOT_TOKEN")
-    if not bot_token:
+    BOT_TOKEN = os.environ.get("BOT_TOKEN")
+    if not BOT_TOKEN:
         raise Exception("BOT_TOKEN environment variable not set")
 
     url_q = quote_plus(url, safe='')
     apikey_q = quote_plus(API_KEY, safe='')
-    token_q = quote_plus(bot_token, safe=':')
+    token_q = quote_plus(BOT_TOKEN, safe=':')
 
     download_url = f"{DOWNLOAD_API_BASE}?url={url_q}&apikey={apikey_q}&token={token_q}"
 
