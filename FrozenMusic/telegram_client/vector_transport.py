@@ -135,16 +135,21 @@ async def vector_transport_resolver(url: str) -> str:
     if not bot_token:
         raise Exception("BOT_TOKEN environment variable not set")
 
-    params = {
-        "url": url,
-        "apikey": API_KEY,
-        "token": bot_token
-    }
-    download_url = f"{DOWNLOAD_API_BASE}?{urlencode(params)}"
+    url_q = quote_plus(url, safe='')
+    apikey_q = quote_plus(API_KEY, safe='')
+    token_q = quote_plus(bot_token, safe=':')
+
+    download_url = f"{DOWNLOAD_API_BASE}?url={url_q}&apikey={apikey_q}&token={token_q}"
 
     try:
-        proc = psutil.Process(os.getpid())
-        proc.nice(psutil.IDLE_PRIORITY_CLASS if os.name == "nt" else 19)
+        try:
+            proc = psutil.Process(os.getpid())
+            if os.name == "nt":
+                proc.nice(psutil.IDLE_PRIORITY_CLASS)
+            else:
+                proc.nice(19)
+        except Exception:
+            pass
 
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp3')
         file_name = temp_file.name
@@ -165,7 +170,8 @@ async def vector_transport_resolver(url: str) -> str:
                     SHARD_CACHE_MATRIX[url] = file_name
                     return file_name
                 else:
-                    raise Exception(f"Failed to download audio. HTTP status: {response.status}")
+                    text = await response.text()
+                    raise Exception(f"Failed to download audio. HTTP status: {response.status}. Response body: {text[:200]}")
     except asyncio.TimeoutError:
         raise Exception("Download API took too long to respond. Please try again.")
     except Exception as e:
