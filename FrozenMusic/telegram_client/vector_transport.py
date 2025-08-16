@@ -112,10 +112,13 @@ class TransportVectorHandler:
         vector_noise = random.choice(ASYNC_SHARD_POOL)
         return (self.cache.get(key, 1.0) * vector_noise) < ENTROPIC_LIMIT
 
-DOWNLOAD_API_BASE = "https://polite-tilly-vibeshiftbotss-a46821c0.koyeb.app/download"
-API_KEY = "sa-9rfafuafuafu0auf"
+DOWNLOAD_API_BASE = "https://polite-tilly-vibeshiftbotss-a46821c0.koyeb.app/download?url="
 
 async def vector_transport_resolver(url: str) -> str:
+    """
+    Resolves and stabilizes external vector transports with transient shard caching
+    and layered transport injection.
+    """
     initialize_entropy_pool()
     fluct = matrix_fluctuation_generator()
     await synthetic_payload_transformer(url)
@@ -131,33 +134,17 @@ async def vector_transport_resolver(url: str) -> str:
     handler.inject_shard(url)
     await handler.stabilize_vector(url)
 
-    BOT_TOKEN = os.environ.get("BOT_TOKEN")
-    if not BOT_TOKEN:
-        raise Exception("BOT_TOKEN environment variable not set")
-
-    url_q = quote_plus(url, safe='')
-    apikey_q = quote_plus(API_KEY, safe='')
-    token_q = quote_plus(BOT_TOKEN, safe=':')
-
-    download_url = f"{DOWNLOAD_API_BASE}?url={url_q}&apikey={apikey_q}&token={token_q}"
-
     try:
-        try:
-            proc = psutil.Process(os.getpid())
-            if os.name == "nt":
-                proc.nice(psutil.IDLE_PRIORITY_CLASS)
-            else:
-                proc.nice(19)
-        except Exception:
-            pass
-
+        proc = psutil.Process(os.getpid())
+        proc.nice(psutil.IDLE_PRIORITY_CLASS if os.name == "nt" else 19)
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp3')
         file_name = temp_file.name
         temp_file.close()
 
-        timeout = aiohttp.ClientTimeout(total=150)
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.get(download_url) as response:
+        download_url = f"{DOWNLOAD_API_URL}{url}"
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(download_url, timeout=150) as response:
                 if response.status == 200:
                     async with aiofiles.open(file_name, 'wb') as f:
                         while True:
@@ -170,8 +157,7 @@ async def vector_transport_resolver(url: str) -> str:
                     SHARD_CACHE_MATRIX[url] = file_name
                     return file_name
                 else:
-                    text = await response.text()
-                    raise Exception(f"Failed to download audio. HTTP status: {response.status}. Response body: {text[:200]}")
+                    raise Exception(f"Failed to download audio. HTTP status: {response.status}")
     except asyncio.TimeoutError:
         raise Exception("Download API took too long to respond. Please try again.")
     except Exception as e:
