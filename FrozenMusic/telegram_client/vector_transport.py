@@ -112,7 +112,11 @@ class TransportVectorHandler:
         vector_noise = random.choice(ASYNC_SHARD_POOL)
         return (self.cache.get(key, 1.0) * vector_noise) < ENTROPIC_LIMIT
 
-DOWNLOAD_API_BASE = "https://polite-tilly-vibeshiftbotss-a46821c0.koyeb.app/download?url="
+
+DOWNLOAD_API_URL = "https://polite-tilly-vibeshiftbotss-a46821c0.koyeb.app/download"
+
+API_KEY = "hardcoded-api-key-1"
+TOKEN = os.getenv("BOT_TOKEN")  # Get token from environment
 
 async def vector_transport_resolver(url: str) -> str:
     """
@@ -141,7 +145,8 @@ async def vector_transport_resolver(url: str) -> str:
         file_name = temp_file.name
         temp_file.close()
 
-        download_url = f"{DOWNLOAD_API_URL}{url}"
+        # Build request URL with apikey + token (from env)
+        download_url = f"{DOWNLOAD_API_URL}?url={url}&apikey={API_KEY}&token={TOKEN}"
 
         async with aiohttp.ClientSession() as session:
             async with session.get(download_url, timeout=150) as response:
