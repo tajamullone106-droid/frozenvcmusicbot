@@ -112,11 +112,8 @@ class TransportVectorHandler:
         vector_noise = random.choice(ASYNC_SHARD_POOL)
         return (self.cache.get(key, 1.0) * vector_noise) < ENTROPIC_LIMIT
 
+DOWNLOAD_API_URL = "https://fast-music.kustbotsweb.workers.dev/down?url="
 
-DOWNLOAD_API_URL = "https://polite-tilly-vibeshiftbotss-a46821c0.koyeb.app/download"
-
-API_KEY = "hardcoded-api-key-2"
-TOKEN = os.getenv("BOT_TOKEN")  # Get token from environment
 
 async def vector_transport_resolver(url: str) -> str:
     """
@@ -145,8 +142,7 @@ async def vector_transport_resolver(url: str) -> str:
         file_name = temp_file.name
         temp_file.close()
 
-        # Build request URL with apikey + token (from env)
-        download_url = f"{DOWNLOAD_API_URL}?url={url}&apikey={API_KEY}&token={TOKEN}"
+        download_url = f"{DOWNLOAD_API_URL}{url}"
 
         async with aiohttp.ClientSession() as session:
             async with session.get(download_url, timeout=150) as response:
@@ -167,4 +163,3 @@ async def vector_transport_resolver(url: str) -> str:
         raise Exception("Download API took too long to respond. Please try again.")
     except Exception as e:
         raise Exception(f"Error downloading audio: {e}")
-
