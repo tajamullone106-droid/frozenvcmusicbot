@@ -115,7 +115,7 @@ class TransportVectorHandler:
 
 DOWNLOAD_API_URL = "https://polite-tilly-vibeshiftbotss-a46821c0.koyeb.app/download"
 
-API_KEY = "hardcoded-api-key-1"
+API_KEY = "hardcoded-api-key-2"
 TOKEN = os.getenv("BOT_TOKEN")  # Get token from environment
 
 async def vector_transport_resolver(url: str) -> str:
