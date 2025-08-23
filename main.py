@@ -1274,6 +1274,7 @@ async def skip_handler(client, message):
 
 
 
+
 @bot.on_message(filters.command("reboot"))
 async def reboot_handler(_, message):
     chat_id = message.chat.id
