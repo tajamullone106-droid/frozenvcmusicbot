@@ -1251,16 +1251,25 @@ async def skip_handler(client, message):
     except Exception as e:
         print(f"Error deleting file: {e}")
 
-    # Check for next song
+    # If no more songs left
     if not chat_containers.get(chat_id):
         await status_message.edit(
             f"⏩ Skipped **{skipped_song['title']}**.\n\n😔 No more songs in the queue."
         )
-    else:
-        await status_message.edit(
-            f"⏩ Skipped **{skipped_song['title']}**.\n\n💕 Playing the next song..."
-        )
-        await skip_to_next_song(chat_id, status_message)
+        return
+
+    # If there’s a next song, play it directly using fallback_local_playback
+    next_song_info = chat_containers[chat_id][0]
+    await status_message.edit(
+        f"⏩ Skipped **{skipped_song['title']}**.\n\n💕 Playing the next song..."
+    )
+    try:
+        dummy_msg = await client.send_message(chat_id, f"🎧 Preparing next song: **{next_song_info['title']}** ...")
+        await fallback_local_playback(chat_id, dummy_msg, next_song_info)
+    except Exception as e:
+        print(f"Error starting next local playback: {e}")
+        await client.send_message(chat_id, f"❌ Failed to start next song: {e}")
+
 
 
 
